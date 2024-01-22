@@ -5,5 +5,5 @@ variable "region" {
   default = "us-east"
 }
 variable "group" {
-  default = "my-kafka-client"
+  default = "kafka-ansible-terraform"
 }

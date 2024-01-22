@@ -17,6 +17,21 @@
         - docker-compose.yml
         - filebeat.docker.yml
 
+    - name: Copy ca cert
+      copy:
+        src: '{{ ansible_dir }}/kafka_server/certs_export/ca/{{ item }}'
+        dest: '{{ dest_dir }}certs_export/ca/'
+      with_items:
+        - ca.crt
+
+    - name: Copy filebeat cert
+      copy:
+        src: '{{ ansible_dir }}/kafka_server/certs_export/filebeat/{{ item }}'
+        dest: '{{ dest_dir }}certs_export/filebeat/'
+      with_items:
+        - filebeat.crt
+        - filebeat.key
+
     - name: Run docker compose
       shell: echo "Run docker compose"
       notify:

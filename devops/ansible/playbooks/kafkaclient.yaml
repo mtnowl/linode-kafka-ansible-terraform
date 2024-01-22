@@ -4,7 +4,6 @@
   vars:
     ansible_dir: './../'
     dest_dir: '/tmp'
-    server_ip: "{{ hostvars['server0']['ansible_host'] }}"
   roles:
     - ./../roles/docker
     - ./../roles/docker_containers
