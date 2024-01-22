@@ -8,7 +8,7 @@ terraform {
   backend "s3" {
       endpoints                   = {s3 = "https://us-east-1.linodeobjects.com"}
       bucket                      = "terraform-backend-testing"
-      key                         = "my-kafka-client.tfstate"
+      key                         = "kafka-ansible-terraform.tfstate"
       region                      = "us-east-1"
       shared_credentials_file     = "./s3-credentials"
       skip_s3_checksum            = true
