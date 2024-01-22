@@ -1,0 +1,36 @@
+instances:
+  - name: es01
+    dns:
+      - es01
+      - localhost
+    ip:
+      - 127.0.0.1
+      - 23.92.18.152
+      - 192.168.1.123
+
+  - name: es02
+    dns:
+      - es02
+      - localhost
+    ip:
+      - 127.0.0.1
+      - 23.92.18.152
+      - 192.168.1.123
+
+  - name: es03
+    dns:
+      - es03
+      - localhost
+    ip:
+      - 127.0.0.1
+      - 23.92.18.152
+      - 192.168.1.123
+
+  - name: filebeat
+    dns:
+      - filebeat
+      - localhost
+    ip:
+      - 127.0.0.1
+      - 96.126.111.162
+      - 192.168.1.123

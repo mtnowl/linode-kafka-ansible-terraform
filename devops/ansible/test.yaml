@@ -1,0 +1,7 @@
+docker exec -it kafka_server-kafka-1 sh
+cd /opt/bitnami/kafka/bin
+./kafka-console-producer.sh --producer.config producer.config --topic my-topic --bootstrap-server kafka:9092
+
+
+curl --cert ./filebeat/filebeat.crt --key .  curl --cert ./filebeat/filebeat.crt --key ./filebeat/filebeat.key --cacert ./ca/ca.crt -u elastic:password https://localhost:9200
+curl --cert ./filebeat/filebeat.crt --key .  curl --cert ./filebeat/filebeat.crt --key ./filebeat/filebeat.key --cacert ./ca/ca.crt -u elastic:password https://192.168.1.123:9200

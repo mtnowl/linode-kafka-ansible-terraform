@@ -1,0 +1,7 @@
+---
+- name: Setup Elastic Search
+  import_playbook: ./playbooks/elasticsearch.yaml
+- name: Setup Kafka Server
+  import_playbook: ./playbooks/kafkaserver.yaml
+- name: Setup Kafka Client
+  import_playbook: ./playbooks/kafkaclient.yaml

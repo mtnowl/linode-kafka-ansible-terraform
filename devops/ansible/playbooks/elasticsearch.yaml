@@ -1,0 +1,24 @@
+---
+- hosts: elasticsearch
+  become: true
+  vars:
+    ansible_dir: './../'
+    dest_dir: '/tmp'
+  roles:
+    - ./../roles/docker
+    - ./../roles/docker_containers
+  tasks:
+    - name: Copy items
+      copy:
+        src: '{{ ansible_dir }}/elasticsearch/{{ item }}'
+        dest: '{{ dest_dir }}'
+      with_items:
+        - docker-compose.yml
+        - .env
+
+    - name: Run docker compose
+      shell: echo "Run docker compose"
+      notify:
+        - docker compose down env
+        - set elastic search map count
+        - docker compose up env

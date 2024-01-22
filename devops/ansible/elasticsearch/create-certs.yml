@@ -1,0 +1,46 @@
+version: '2.2'
+
+services:
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+      - ./certs_export:/usr/share/elasticsearch/config/certs_export
+      - './instances.yml:/usr/share/elasticsearch/config/instances.yml:ro'
+    user: '0'
+    command: >
+      bash -c '
+        if [ x${ELASTIC_PASSWORD} == x ]; then
+          echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
+          exit 1;
+        elif [ x${KIBANA_PASSWORD} == x ]; then
+          echo "Set the KIBANA_PASSWORD environment variable in the .env file";
+          exit 1;
+        fi;
+        if [ ! -f config/instances.yml ]; then
+          echo "Missing instances.yml file, please create";
+          exit 1;
+        fi;
+        if [ ! -f config/certs/ca.zip ]; then
+          echo "Creating CA";
+          bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
+          unzip config/certs/ca.zip -d config/certs;
+          unzip config/certs/ca.zip -d config/certs_export;
+          cp config/certs/ca.zip config/certs_export/ca.zip
+        fi;
+        if [ ! -f config/certs/certs.zip ]; then
+          echo "Creating certs";
+          bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+          unzip config/certs/certs.zip -d config/certs;
+          unzip config/certs/certs.zip -d config/certs_export;
+          cp config/certs/certs.zip config/certs_export/certs.zip
+        fi;
+        echo "Setting file permissions"
+        chown -R root:root config/certs;
+        find . -type d -exec chmod 750 \{\} \;;
+        find . -type f -exec chmod 640 \{\} \;;
+        echo "All done!";
+      '
+volumes:
+  certs:
+    driver: local

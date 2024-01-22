@@ -1,0 +1,48 @@
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+filebeat.inputs:
+  - type: kafka
+    hosts:
+      - kafka:9092
+    topics: ['my-topic']
+    group_id: 'filebeat'
+    username: 'user'
+    password: 'password'
+    sasl.mechanism: SCRAM-SHA-256
+
+processors:
+  - add_docker_metadata: ~
+
+output.elasticsearch:
+  hosts: 'https://192.168.1.123:9200'
+  username: 'elastic'
+  password: 'password'
+  ssl:
+    certificate_authorities: '/etc/client/certs_export/ca/ca.crt'
+    certificate: '/etc/client/certs_export/filebeat/filebeat.crt'
+    key: '/etc/client/certs_export/filebeat/filebeat.key'
+
+setup.kibana:
+  host: 'https://192.168.1.123:5601'
+  ssl:
+    enabled: true
+    certificate_authorities: '/etc/client/certs_export/ca/ca.crt'
+    certificate: '/etc/client/certs_export/filebeat/filebeat.crt'
+    key: '/etc/client/certs_export/filebeat/filebeat.key'
+# output.console:
+#   pretty: true
+# logging.level: info
+# logging.to_files: true
+# logging.files:
+#   path: /var/log/filebeat
+#   name: filebeat
+#   keepfiles: 7
+#   permissions: 0640

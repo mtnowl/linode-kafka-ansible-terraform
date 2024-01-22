@@ -1,0 +1,38 @@
+version: '3'
+services:
+  kafka:
+    # hostname: 96.126.111.162
+    hostname: 192.168.1.123
+    ports:
+      - 9092:9092
+      - 9093:9093
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@//:9093
+      - KAFKA_CFG_LISTENERS=SASL_PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:SASL_PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=SASL_PLAINTEXT://:9092
+      - KAFKA_CLIENT_USERS=user
+      - KAFKA_CLIENT_PASSWORDS=password
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_SASL_MECHANISM_CONTROLLER_PROTOCOL=PLAIN
+      - KAFKA_CONTROLLER_USER=controller_user
+      - KAFKA_CONTROLLER_PASSWORD=controller_password
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=SASL_PLAINTEXT
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+      - KAFKA_INTER_BROKER_USER=controller_user
+      - KAFKA_INTER_BROKER_PASSWORD=controller_password
+    image: bitnami/kafka:3.5.2
+  filebeat:
+    container_name: filebeat
+    depends_on:
+      - kafka
+    user: root
+    volumes:
+      - './filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro'
+      - './certs_export:/etc/client/certs_export:ro'
+      - '/var/lib/docker/containers:/var/lib/docker/containers:ro'
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+    command: filebeat -e --strict.perms=false
+    image: docker.elastic.co/beats/filebeat:8.11.4

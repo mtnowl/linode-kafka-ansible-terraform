@@ -1,0 +1,14 @@
+version: '3'
+services:
+  kafdrop:
+    ports:
+      - 9000:9000
+    environment:
+      # - KAFKA_BROKERCONNECT=${SERVER_IP}:9092
+      - KAFKA_BROKERCONNECT=192.168.1.123:9092
+      # - KAFKA_BROKERCONNECT=96.126.111.162:9092
+      - SERVER_SERVLET_CONTEXTPATH=/
+      - KAFKA_PROPERTIES_FILE=/tmp/kafka.properties
+    volumes:
+      - ./kafka.properties:/tmp/kafka.properties:ro
+    image: obsidiandynamics/kafdrop

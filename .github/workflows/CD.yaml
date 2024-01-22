@@ -1,0 +1,48 @@
+name: Continuous Deployment
+
+on:
+  workflow_dispatch:
+
+env:
+  TF_DIR: ./devops/terraform
+  TF_VAR_client_instance_count: 2
+  TF_VAR_token: ${{secrets.TERRAFORM_ACCESS_TOKEN}}
+  TF_VAR_authorized_keys: ${{secrets.TERRAFORM_AUTHORIZED_KEYS}}
+  TF_VAR_root_pass: ${{secrets.TERRAFORM_ROOT_PASS}}
+  AWS_ACCESS_KEY_ID: ${{secrets.TERRAFORM_S3_ACCESS_KEY}}
+  AWS_SECRET_ACCESS_KEY: ${{secrets.TERRAFORM_S3_SECRET_ACCESS_KEY}}
+
+jobs:
+  terraform-ansible:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        run: terraform -chdir=$TF_DIR init
+      - name: Terraform Validate
+        run: terraform -chdir=$TF_DIR validate -no-color
+      - name: Terraform Apply Changes
+        run: terraform -chdir=$TF_DIR apply -auto-approve
+      - name: Check inventory.ini
+        working-directory: ./devops/ansible
+        run: cat inventory.ini
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Ansible
+        run: pip install ansible
+      - name: Output SSH key to file
+        run: |
+          mkdir ~/.ssh
+          echo "${{secrets.ANSIBLE_PRIVATE_SSH_KEY}}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Run main playbook
+        working-directory: ./devops/ansible
+        run: |
+          ansible-playbook main.yaml

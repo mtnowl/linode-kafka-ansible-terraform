@@ -1,0 +1,82 @@
+- name: docker stop containers
+  shell: docker stop $(docker ps -aq)
+  when: containers_running.rc == 0
+  ignore_errors: true
+- name: docker remove containers
+  shell: docker rm $(docker ps -aq)
+  when: containers_running.rc == 0
+  ignore_errors: true
+
+- name: docker run kafka
+  vars:
+    _dest_dir: /tmp
+  shell: |
+    docker run -d --name kafka \
+    --hostname {{ ansible_default_ipv4.address }} \
+    -e KAFKA_CFG_NODE_ID=0 \
+    -e KAFKA_CFG_PROCESS_ROLES=controller,broker \
+    -e KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@//:9093 \
+    -e KAFKA_CFG_LISTENERS=SASL_PLAINTEXT://:9092,CONTROLLER://:9093 \
+    -e KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:SASL_PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT \
+    -e KAFKA_CFG_ADVERTISED_LISTENERS=SASL_PLAINTEXT://:9092 \
+    -e KAFKA_CLIENT_USERS=user \
+    -e KAFKA_CLIENT_PASSWORDS=password \
+    -e KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER \
+    -e KAFKA_CFG_SASL_MECHANISM_CONTROLLER_PROTOCOL=PLAIN \
+    -e KAFKA_CONTROLLER_USER=controller_user \
+    -e KAFKA_CONTROLLER_PASSWORD=controller_password \
+    -e KAFKA_CFG_INTER_BROKER_LISTENER_NAME=SASL_PLAINTEXT \
+    -e KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN \
+    -e KAFKA_INTER_BROKER_USER=controller_user \
+    -e KAFKA_INTER_BROKER_PASSWORD=controller_password \
+    -p 9092:9092 \
+    -p 9093:9093 \
+    bitnami/kafka:latest
+
+- name: docker run kafdrop
+  vars:
+    _dest_dir: /tmp
+  shell: |
+    docker run -d --rm -p 9000:9000 \
+    -e KAFKA_BROKERCONNECT=45.79.141.251:9092 \
+    -e KAFKA_PROPERTIES="$(cat {{ dest_dir }}/kafka.properties | base64)" \
+    -e SERVER_SERVLET_CONTEXTPATH="/" \
+    obsidiandynamics/kafdrop
+
+- name: docker run filebeat
+  vars:
+    _elasticsearch: 198.74.56.69
+  shell: |
+    docker run \
+    docker.elastic.co/beats/filebeat:8.11.3 \
+    setup -E setup.kibana.host={{elasticsearch}}:5601 \
+    -E output.elasticsearch.hosts=["{{elasticsearch}}:9200"]
+
+- name: docker compose down
+  vars:
+    _dest_dir: /tmp
+  shell: |
+    docker compose -f {{dest_dir}}/docker-compose.yml down
+
+- name: docker compose down env
+  vars:
+    _dest_dir: /tmp
+  shell: |
+    docker compose -f {{dest_dir}}/docker-compose.yml --env-file {{dest_dir}}/.env down
+
+- name: set elastic search map count
+  sysctl: name={{ item.key }} value={{ item.value }}
+  with_items:
+    - { key: 'vm.max_map_count', value: '262144' }
+
+- name: docker compose up
+  vars:
+    _dest_dir: /tmp
+  shell: |
+    docker compose -f {{dest_dir}}/docker-compose.yml up -d
+
+- name: docker compose up env
+  vars:
+    _dest_dir: /tmp
+  shell: |
+    docker compose -f {{dest_dir}}/docker-compose.yml --env-file {{dest_dir}}/.env up -d
