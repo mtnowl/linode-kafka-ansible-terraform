@@ -2,7 +2,7 @@ version: '3'
 services:
   kafka:
     # hostname: 96.126.111.162
-    hostname: 192.168.1.123
+    hostname: 45.79.175.237
     ports:
       - 9092:9092
       - 9093:9093
@@ -30,7 +30,7 @@ services:
       - kafka
     user: root
     volumes:
-      - './filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro'
+      - './filebeat.config.yml:/usr/share/filebeat/filebeat.yml:ro'
       - './certs_export:/etc/client/certs_export:ro'
       - '/var/lib/docker/containers:/var/lib/docker/containers:ro'
       - '/var/run/docker.sock:/var/run/docker.sock:ro'

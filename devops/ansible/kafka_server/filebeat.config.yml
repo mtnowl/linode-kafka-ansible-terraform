@@ -37,12 +37,3 @@ setup.kibana:
     certificate_authorities: '/etc/client/certs_export/ca/ca.crt'
     certificate: '/etc/client/certs_export/filebeat/filebeat.crt'
     key: '/etc/client/certs_export/filebeat/filebeat.key'
-# output.console:
-#   pretty: true
-# logging.level: info
-# logging.to_files: true
-# logging.files:
-#   path: /var/log/filebeat
-#   name: filebeat
-#   keepfiles: 7
-#   permissions: 0640

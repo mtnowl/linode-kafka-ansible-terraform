@@ -8,29 +8,29 @@
     - ./../roles/docker
     - ./../roles/docker_containers
   tasks:
-    - name: Copy kafka.properties
-      copy:
-        src: '{{ ansible_dir }}/kafka_server/{{ item }}'
-        dest: '{{ dest_dir }}'
-      with_items:
-        - kafka.properties
-        - docker-compose.yml
-        - filebeat.docker.yml
-
     - name: Copy ca cert
       copy:
         src: '{{ ansible_dir }}/kafka_server/certs_export/ca/{{ item }}'
-        dest: '{{ dest_dir }}certs_export/ca/'
+        dest: '{{ dest_dir }}/certs_export/ca/'
       with_items:
         - ca.crt
 
     - name: Copy filebeat cert
       copy:
         src: '{{ ansible_dir }}/kafka_server/certs_export/filebeat/{{ item }}'
-        dest: '{{ dest_dir }}certs_export/filebeat/'
+        dest: '{{ dest_dir }}/certs_export/filebeat/'
       with_items:
         - filebeat.crt
         - filebeat.key
+
+    - name: Copy other items
+      copy:
+        src: '{{ ansible_dir }}/kafka_server/{{ item }}'
+        dest: '{{ dest_dir }}'
+      with_items:
+        - kafka.properties
+        - docker-compose.yml
+        - filebeat.config.yml
 
     - name: Run docker compose
       shell: echo "Run docker compose"

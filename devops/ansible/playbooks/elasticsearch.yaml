@@ -16,6 +16,11 @@
         - docker-compose.yml
         - .env
 
+    - name: Copy certs
+      copy:
+        src: '{{ ansible_dir }}/elasticsearch/certs_export/'
+        dest: '{{ dest_dir }}/certs_export/'
+
     - name: Run docker compose
       shell: echo "Run docker compose"
       notify:
